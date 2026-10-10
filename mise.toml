@@ -1,0 +1,26 @@
+[tools]
+"aqua:kubernetes-sigs/cloud-provider-kind" = "latest"
+kind = "latest"
+
+[tasks.setup]
+description = "rootful podman machine to sidestep various pitfalls"
+shell = "bash -c"
+run = '''
+podman machine init --rootful --cpus 4 --memory 8192 --disk-size 60 kind
+podman system connection default kind-root
+'''
+
+[tasks.cluster]
+description = "kind create cluster"
+shell = "bash -c"
+run = "kind create cluster --name dev --image kindest/node:v1.37.0 --config config.yaml"
+
+[tasks.kind-lb]
+description = "local lb provider"
+shell = "bash -c"
+run = "sudo nohup cloud-provider-kind >/dev/null &"
+
+[tasks.sample-app]
+description = "sample app with gateway, route, deployment"
+shell = "bash -c"
+run = "kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/cloud-provider-kind/refs/heads/main/examples/gateway_httproute_simple.yaml"
